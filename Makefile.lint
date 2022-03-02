@@ -1,0 +1,43 @@
+ifneq (,)
+.error This Makefile requires GNU Make.
+endif
+
+
+# -------------------------------------------------------------------------------------------------
+# Default configuration
+# -------------------------------------------------------------------------------------------------
+CURRENT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+FL_VERSION  = 0.4
+FL_IGNORES  = .git/,.github/,tests/
+
+
+# -------------------------------------------------------------------------------------------------
+# Lint Targets
+# -------------------------------------------------------------------------------------------------
+.PHONY: lint
+lint: lint-files
+lint: lint-yaml
+
+
+.PHONY: lint-files
+lint-files:
+	@echo "################################################################################"
+	@echo "# Lint Files"
+	@echo "################################################################################"
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-cr --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-crlf --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-trailing-single-newline --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-trailing-space --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-utf8 --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-utf8-bom --text --ignore '$(FL_IGNORES)' --path .
+	@echo
+
+
+.PHONY: lint-yaml
+lint-yaml:
+	@# Lint all files
+	@echo "################################################################################"
+	@echo "# Lint Yaml"
+	@echo "################################################################################"
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/yamllint .
+	@echo

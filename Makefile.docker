@@ -95,17 +95,23 @@ docker-arch-push:
 # -------------------------------------------------------------------------------------------------
 .PHONY: docker-manifest-create
 docker-manifest-create:
+	@if [ "$(ARCHES)" = "" ]; then \
+		echo "This make target requires the ARCHES variable to be set."; \
+		echo "make docker-manifest-create ARCHES="; \
+		echo "Exiting."; \
+		false; \
+	fi
 	@echo "################################################################################"
-	@echo "# Creating Manifest $(IMAGE):$(TAG) ($(ARCH))"
+	@echo "# Creating Manifest $(IMAGE):$(TAG) ($(ARCHES))"
 	@echo "################################################################################"
 	@echo "docker manifest create \
 		$(IMAGE):$(TAG) \
-		$$( echo $(ARCH) | sed 's/,/ /g' | sed 's|/|-|g' | xargs -n1 sh -c 'printf -- " --amend $(IMAGE):$(TAG)-manifest-$${1}"' -- )" \
+		$$( echo $(ARCHES) | sed 's/,/ /g' | sed 's|/|-|g' | xargs -n1 sh -c 'printf -- " --amend $(IMAGE):$(TAG)-manifest-$${1}"' -- )" \
 	| sed 's/\s\s*/ /g' \
 	| sed 's/--/\\\n  --/g'
 	@echo "docker manifest create \
 		$(IMAGE):$(TAG) \
-		$$( echo $(ARCH) | sed 's/,/ /g' | sed 's|/|-|g' | xargs -n1 sh -c 'printf -- " --amend $(IMAGE):$(TAG)-manifest-$${1}"' -- )" \
+		$$( echo $(ARCHES) | sed 's/,/ /g' | sed 's|/|-|g' | xargs -n1 sh -c 'printf -- " --amend $(IMAGE):$(TAG)-manifest-$${1}"' -- )" \
 	| bash
 
 

@@ -5,6 +5,7 @@ Common Makefiles for Devilbox ecosystem.
 
 ## Usage in main Makefile
 
+`Makefile`:
 ```makefile
 ifneq (,)
 .error This Makefile requires GNU Make.
@@ -21,3 +22,10 @@ $(MAKEFILES):
 	fi
 include $(MAKEFILES)
 ```
+
+
+## License
+
+**[MIT License](LICENSE)**
+
+Copyright (c) 2022 [cytopia](https://github.com/cytopia)

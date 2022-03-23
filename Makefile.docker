@@ -153,7 +153,10 @@ docker-pull-base-image:
 	@echo "################################################################################"
 	@echo "# Pulling Base Image $(shell grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g';) (platform: $(ARCH))"
 	@echo "################################################################################"
-	while ! docker pull --platform $(ARCH) $(shell grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g';); do sleep 1; done
+	@grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | while read -r line; do \
+		echo "docker pull --platform $(ARCH) $${line}"; \
+		while ! docker pull --platform $(ARCH) $${line}; do sleep 1; done \
+	done
 
 
 .PHONY: docker-enter

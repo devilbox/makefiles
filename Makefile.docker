@@ -146,6 +146,42 @@ docker-manifest-push:
 
 
 # -------------------------------------------------------------------------------------------------
+# Export/Import targets
+# -------------------------------------------------------------------------------------------------
+.PHONY: docker-save
+docker-save:
+	@if [ "$(OUTFILE)" = "" ]; then \
+		echo "This make target requires the OUTFILE variable to be set."; \
+		echo "make docker-save OUTFILE="; \
+		echo "Exiting."; \
+		false; \
+	fi
+	@if [ "$(IMAGE)" = "" ]; then \
+		echo "This make target requires the IMAGE variable to be set."; \
+		echo "make docker-arch-build IMAGE="; \
+		echo "Exiting."; \
+		false; \
+	fi
+	@echo "################################################################################"
+	@echo "# Saving $(IMAGE):$(DOCKER_TAG) to: $(OUTFILE)"
+	@echo "################################################################################"
+	docker save -o "$(OUTFILE)" $(IMAGE):$(DOCKER_TAG)
+
+.PHONY: docker-load
+docker-load:
+	@if [ "$(INFILE)" = "" ]; then \
+		echo "This make target requires the INFILE variable to be set."; \
+		echo "make docker-load INFILE="; \
+		echo "Exiting."; \
+		false; \
+	fi
+	@echo "################################################################################"
+	@echo "# Loading $(INFILE)"
+	@echo "################################################################################"
+	docker load -i "$(INFILE)"
+
+
+# -------------------------------------------------------------------------------------------------
 #  Helper Targets
 # -------------------------------------------------------------------------------------------------
 .PHONY: docker-pull-base-image

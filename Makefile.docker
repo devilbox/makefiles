@@ -165,7 +165,7 @@ docker-save:
 	@echo "################################################################################"
 	@echo "# Saving $(IMAGE):$(DOCKER_TAG) to: $(OUTFILE)"
 	@echo "################################################################################"
-	docker save $(IMAGE):$(DOCKER_TAG) | gzip -9 > "$(OUTFILE)"
+	docker save $(IMAGE):$(DOCKER_TAG) | gzip > "$(OUTFILE)"
 
 .PHONY: docker-load
 docker-load:

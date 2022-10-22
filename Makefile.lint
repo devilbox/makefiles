@@ -15,7 +15,7 @@ CURRENT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 FL_VERSION  = 0.4
 FL_IGNORES  = .git/,.github/
 # Json lint
-JL_VERSION = 1.6.0-0.5
+JL_VERSION = latest
 JL_IGNORES = .git/,.github/
 # Yamllint
 YL_VERSION = 1.26-0.9

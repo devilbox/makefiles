@@ -12,7 +12,7 @@ ifneq (,)
 endif
 
 # Ensure additional Makefiles are present
-MAKEFILES = Makefile.docker Makefile.lint Makefile.platform
+MAKEFILES = Makefile.docker Makefile.lint
 $(MAKEFILES): URL=https://raw.githubusercontent.com/devilbox/makefiles/master/$(@)
 $(MAKEFILES):
 	@if ! (curl --fail -sS -o $(@) $(URL) || wget -O $(@) $(URL)); then \
@@ -27,7 +27,6 @@ include $(MAKEFILES)
 ```gitignore
 Makefile.docker
 Makefile.lint
-Makefile.platform
 ```
 
 

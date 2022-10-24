@@ -23,13 +23,6 @@ YL_VERSION = latest
 SC_IGNORES = .git/,.github/
 SC_VERSION = stable
 
-# Ensure to use correct docker platform for linting images
-LINT_ARCH = linux/amd64
-ifeq ($(strip $(shell uname -m)),arm64)
-	LINT_ARCH = linux/arm64
-endif
-
-
 # -------------------------------------------------------------------------------------------------
 # Lint Targets
 # -------------------------------------------------------------------------------------------------
@@ -46,12 +39,12 @@ lint-files:
 	@echo "################################################################################"
 	@echo "# Lint Files"
 	@echo "################################################################################"
-	@docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-cr --text --ignore '$(FL_IGNORES)' --path .
-	@docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-crlf --text --ignore '$(FL_IGNORES)' --path .
-	@docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-trailing-single-newline --text --ignore '$(FL_IGNORES)' --path .
-	@docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-trailing-space --text --ignore '$(FL_IGNORES)' --path .
-	@docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-utf8 --text --ignore '$(FL_IGNORES)' --path .
-	@docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-utf8-bom --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-cr --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-crlf --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-trailing-single-newline --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-trailing-space --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-utf8 --text --ignore '$(FL_IGNORES)' --path .
+	@docker run --rm $$(tty -s && echo "-it" || echo) -v $(CURRENT_DIR):/data cytopia/file-lint:$(FL_VERSION) file-utf8-bom --text --ignore '$(FL_IGNORES)' --path .
 	@echo
 
 
@@ -61,7 +54,7 @@ lint-yaml:
 	@echo "################################################################################"
 	@echo "# Lint Yaml"
 	@echo "################################################################################"
-	@if docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v "$(CURRENT_DIR):/data:ro" -w /data cytopia/yamllint:$(YL_VERSION) .; then \
+	@if docker run --rm $$(tty -s && echo "-it" || echo) -v "$(CURRENT_DIR):/data:ro" -w /data cytopia/yamllint:$(YL_VERSION) .; then \
 		echo "OK"; \
 	else \
 		echo "Failed"; \
@@ -76,7 +69,7 @@ lint-json:
 	@echo "################################################################################"
 	@echo "# Lint JSON"
 	@echo "################################################################################"
-	@if docker run --platform $(LINT_ARCH) --rm $$(tty -s && echo "-it" || echo) -v "$(CURRENT_DIR):/data:ro" -w /data cytopia/jsonlint:$(JL_VERSION) \
+	@if docker run --rm $$(tty -s && echo "-it" || echo) -v "$(CURRENT_DIR):/data:ro" -w /data cytopia/jsonlint:$(JL_VERSION) \
 		-t '  ' -i '$(JL_IGNORES)' '*.json'; then \
 		echo "OK"; \
 	else \
@@ -99,7 +92,7 @@ lint-bash:
 	CMD="find . -name '*.sh' $${IGNORES} -print0"; \
 	echo "$${CMD}"; \
 	if [ "$$( eval "$${CMD}" )" != "" ]; then \
-		eval "$${CMD}" | xargs -0 -n1  docker run --platform $(LINT_ARCH) --rm -v $(CURRENT_DIR):/data -w /data koalaman/shellcheck:$(SC_VERSION) --shell=bash; \
+		eval "$${CMD}" | xargs -0 -n1  docker run --rm -v $(CURRENT_DIR):/data -w /data koalaman/shellcheck:$(SC_VERSION) --shell=bash; \
 	fi
 
 
@@ -108,10 +101,10 @@ lint-bash:
 # -------------------------------------------------------------------------------------------------
 .PHONY: _lint-files-pull
 _lint-files-pull:
-	@echo "Pulling cytopia/file-lint:$(FL_VERSION) ($(LINT_ARCH))"; \
+	@echo "Pulling cytopia/file-lint:$(FL_VERSION)"; \
 	SUCC=0; \
 	for i in $$(seq 10); do \
-		if docker pull -q --platform $(LINT_ARCH) cytopia/file-lint:$(FL_VERSION); then \
+		if docker pull -q cytopia/file-lint:$(FL_VERSION); then \
 			SUCC=1; \
 			break; \
 		fi; \
@@ -121,10 +114,10 @@ _lint-files-pull:
 
 .PHONY: _lint-yaml-pull
 _lint-yaml-pull:
-	@echo "Pulling cytopia/yamllint:$(YL_VERSION) ($(LINT_ARCH))"; \
+	@echo "Pulling cytopia/yamllint:$(YL_VERSION)"; \
 	SUCC=0; \
 	for i in $$(seq 10); do \
-		if docker pull -q --platform $(LINT_ARCH) cytopia/yamllint:$(YL_VERSION); then \
+		if docker pull -q cytopia/yamllint:$(YL_VERSION); then \
 			SUCC=1; \
 			break; \
 		fi; \
@@ -134,10 +127,10 @@ _lint-yaml-pull:
 
 .PHONY: _lint-json-pull
 _lint-json-pull:
-	@echo "Pulling cytopia/jsonlint:$(JL_VERSION) ($(LINT_ARCH))"; \
+	@echo "Pulling cytopia/jsonlint:$(JL_VERSION)"; \
 	SUCC=0; \
 	for i in $$(seq 10); do \
-		if docker pull -q --platform $(LINT_ARCH) cytopia/jsonlint:$(JL_VERSION); then \
+		if docker pull -q cytopia/jsonlint:$(JL_VERSION); then \
 			SUCC=1; \
 			break; \
 		fi; \
@@ -147,10 +140,10 @@ _lint-json-pull:
 
 .PHONY: _lint-bash-pull
 _lint-bash-pull:
-	@echo "Pulling koalaman/shellcheck:$(SC_VERSION) ($(LINT_ARCH))"; \
+	@echo "Pulling koalaman/shellcheck:$(SC_VERSION)"; \
 	SUCC=0; \
 	for i in $$(seq 10); do \
-		if docker pull -q --platform $(LINT_ARCH) koalaman/shellcheck:$(SC_VERSION); then \
+		if docker pull -q koalaman/shellcheck:$(SC_VERSION); then \
 			SUCC=1; \
 			break; \
 		fi; \

@@ -1,0 +1,27 @@
+ifneq (,)
+.error This Makefile requires GNU Make.
+endif
+
+ifndef VERBOSE
+MAKEFLAGS += --no-print-directory
+endif
+
+
+# -------------------------------------------------------------------------------------------------
+# Default configuration
+# -------------------------------------------------------------------------------------------------
+ARCH = linux/amd64
+
+
+# -------------------------------------------------------------------------------------------------
+# Dynamic configuration
+# -------------------------------------------------------------------------------------------------
+_PLATFORM = $(shell uname -m)
+
+ifeq ($(strip $(_PLATFORM)),x86_64)
+	ARCH = linux/amd64
+else
+	ifeq ($(strip $(_PLATFORM)),arm64)
+		ARCH = linux/arm64
+	endif
+endif

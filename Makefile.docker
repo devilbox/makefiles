@@ -19,11 +19,19 @@ IMAGE   =
 # -------------------------------------------------------------------------------------------------
 NO_CACHE   =
 ARGS       =
-ARCH       = linux/amd64
 DOCKER_TAG = latest
 DIR        = .
 FILE       = Dockerfile
 
+# Auto-detect current platform and use it as default to build for
+_PLATFORM = $(shell uname -m)
+ifeq ($(strip $(_PLATFORM)),x86_64)
+	ARCH = linux/amd64
+else
+	ifeq ($(strip $(_PLATFORM)),arm64)
+		ARCH = linux/arm64
+	endif
+endif
 
 # -------------------------------------------------------------------------------------------------
 # Targets

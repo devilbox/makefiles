@@ -1,0 +1,56 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# Job Name
+# -------------------------------------------------------------------------------------------------
+name: lint
+
+
+# -------------------------------------------------------------------------------------------------
+# When to run
+# -------------------------------------------------------------------------------------------------
+on:
+  # Runs on Pull Requests
+  pull_request:
+
+
+# -------------------------------------------------------------------------------------------------
+# What to run
+# -------------------------------------------------------------------------------------------------
+jobs:
+  # -----------------------------------------------------------------------------------------------
+  # JOB (1/1): Lint
+  # -----------------------------------------------------------------------------------------------
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: "[SETUP] Checkout repository"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Lint Files
+        uses: cytopia/shell-command-retry-action@v0.1.3
+        with:
+          command: |
+            make -f Makefile.lint lint-files
+
+      - name: Lint Yaml
+        uses: cytopia/shell-command-retry-action@v0.1.3
+        with:
+          command: |
+            make -f Makefile.lint lint-yaml
+
+      - name: Lint JSON
+        uses: cytopia/shell-command-retry-action@v0.1.3
+        with:
+          command: |
+            make -f Makefile.lint lint-json
+
+      - name: Lint Bash
+        uses: cytopia/shell-command-retry-action@v0.1.3
+        with:
+          command: |
+            make -f Makefile.lint lint-bash

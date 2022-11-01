@@ -199,7 +199,17 @@ docker-pull-base-image:
 	@echo "################################################################################"
 	@grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | sort -u | while read -r line; do \
 		echo "docker pull --platform $(ARCH) $${line}"; \
-		while ! docker pull --platform $(ARCH) $${line}; do sleep 1; done \
+		SUCC=0; \
+		for count in $$(seq 10); do \
+			if docker pull --platform $(ARCH) $${line}; then \
+				SUCC=1; \
+				break; \
+			fi; \
+		done; \
+		if [ "$${SUCC}" != "1" ]; then \
+			echo "Failed."; \
+			exit 1; \
+		fi; \
 	done
 
 

@@ -23,6 +23,10 @@ DOCKER_TAG = latest
 DIR        = .
 FILE       = Dockerfile
 
+# Space separated Docker images (in FROM block) to not to pull
+DOCKER_PULL_BASE_IMAGES_IGNORE =
+
+
 # Auto-detect current platform and use it as default to build for
 _PLATFORM = $(shell uname -m)
 ifeq ($(strip $(_PLATFORM)),x86_64)
@@ -193,11 +197,24 @@ docker-load:
 #  Helper Targets
 # -------------------------------------------------------------------------------------------------
 .PHONY: docker-pull-base-image
+_DOCKER_PULL_BASE_IMAGES_FOUND = $(shell grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | sort -u )
+_DOCKER_PULL_BASE_IMAGES_PULL = $(shell \
+	for img in $$( echo "$(_DOCKER_PULL_BASE_IMAGES_FOUND)" | sed 's/\s/\n/g' ); do \
+		if ! echo $(DOCKER_PULL_BASE_IMAGES_IGNORE) | grep -F "$${img}" >/dev/null; then \
+			echo "$${img}"; \
+		fi; \
+	done; \
+)
 docker-pull-base-image:
 	@echo "################################################################################"
-	@echo "# Pulling Base Image $(shell grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g';) (platform: $(ARCH))"
+	@echo "# Pulling Base Image (platform: $(ARCH))"
 	@echo "################################################################################"
-	@grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | sort -u | while read -r line; do \
+	@echo "Docker File:   $(DIR)/$(FILE)"
+	@echo "Images Found:  $(_DOCKER_PULL_BASE_IMAGES_FOUND)"
+	@echo "Images Ignore: $(DOCKER_PULL_BASE_IMAGES_IGNORE)"
+	@echo "Images Actual: $(_DOCKER_PULL_BASE_IMAGES_PULL)"
+	@echo
+	@echo $(_DOCKER_PULL_BASE_IMAGES_PULL) | sed 's/\s/\n/g' | while read -r line; do \
 		echo "docker pull --platform $(ARCH) $${line}"; \
 		SUCC=0; \
 		for count in $$(seq 10); do \

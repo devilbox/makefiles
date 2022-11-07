@@ -198,17 +198,18 @@ docker-load:
 # -------------------------------------------------------------------------------------------------
 .PHONY: docker-pull-base-image
 _DOCKER_PULL_BASE_IMAGES_FOUND = $(shell grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | sort -u )
-DOCKER_PULL_VARIABLES = VERSION=$(VERSION)
+DOCKER_PULL_VARIABLES = "VERSION=$(VERSION)"
 docker-pull-base-image:
 	@echo "################################################################################"
 	@echo "# Pulling Base Image (platform: $(ARCH))"
 	@echo "################################################################################"
 	@echo "Docker File:   $(DIR)/$(FILE)"
-	@if [ -n "$(DOCKER_PULL_VARIABLES)" ]; then for e in "$(DOCKER_PULL_VARIABLES)";do export "$${e}";done; fi; echo "Images Found:  $(_DOCKER_PULL_BASE_IMAGES_FOUND)"
-	@if [ -n "$(DOCKER_PULL_VARIABLES)" ]; then for e in "$(DOCKER_PULL_VARIABLES)";do export "$${e}";done; fi; echo "Images Ignore: $(DOCKER_PULL_BASE_IMAGES_IGNORE)"
+	@echo "Var Exports:   $(DOCKER_PULL_VARIABLES)"
+	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export $${e};done;fi; echo "Images Found:  $(_DOCKER_PULL_BASE_IMAGES_FOUND)"
+	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export $${e};done;fi; echo "Images Ignore: $(DOCKER_PULL_BASE_IMAGES_IGNORE)"
 	@echo
 	@# These variables will be exported to the shell
-	@if [ -n "$(DOCKER_PULL_VARIABLES)" ]; then for e in "$(DOCKER_PULL_VARIABLES)";do export "$${e}";done; fi; \
+	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export $${e};done;fi; \
 	echo $(_DOCKER_PULL_BASE_IMAGES_FOUND) | sed 's/\s/\n/g' | while read -r line; do \
 		if echo "$(DOCKER_PULL_BASE_IMAGES_IGNORE)" | grep -F "$${line}" >/dev/null; then \
 			continue; \

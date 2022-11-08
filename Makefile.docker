@@ -205,12 +205,12 @@ docker-pull-base-image:
 	@echo "################################################################################"
 	@echo "Docker File:   $(DIR)/$(FILE)"
 	@echo "Var Exports:   $(DOCKER_PULL_VARIABLES)"
-	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export $${e};done;fi; echo "Images Found:  $(_DOCKER_PULL_BASE_IMAGES_FOUND)"
-	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export $${e};done;fi; echo "Images Ignore: $(DOCKER_PULL_BASE_IMAGES_IGNORE)"
+	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; echo "Images Found:  $(_DOCKER_PULL_BASE_IMAGES_FOUND)"
+	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; echo "Images Ignore: $(DOCKER_PULL_BASE_IMAGES_IGNORE)"
 	@echo
-	@# These variables will be exported to the shell
-	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export $${e};done;fi; \
-	echo $(_DOCKER_PULL_BASE_IMAGES_FOUND) | sed 's/\s/\n/g' | while read -r line; do \
+	# These variables will be exported to the shell
+	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; \
+	@echo $(_DOCKER_PULL_BASE_IMAGES_FOUND) | sed 's/\s/\n/g' | while read -r line; do \
 		if echo "$(DOCKER_PULL_BASE_IMAGES_IGNORE)" | grep -F "$${line}" >/dev/null; then \
 			continue; \
 		fi; \

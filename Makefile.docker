@@ -210,7 +210,7 @@ docker-pull-base-image:
 	@echo
 	# These variables will be exported to the shell
 	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; \
-	@echo $(_DOCKER_PULL_BASE_IMAGES_FOUND) | sed 's/\s/\n/g' | while read -r line; do \
+	echo $(_DOCKER_PULL_BASE_IMAGES_FOUND) | sed 's/\s/\n/g' | while read -r line; do \
 		if echo "$(DOCKER_PULL_BASE_IMAGES_IGNORE)" | grep -F "$${line}" >/dev/null; then \
 			continue; \
 		fi; \

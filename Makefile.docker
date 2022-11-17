@@ -82,6 +82,7 @@ docker-arch-build:
 	docker build \
 		$(NO_CACHE) \
 		$(ARGS) \
+		--network host \
 		--platform $(ARCH) \
 		--label "org.opencontainers.image.created"="$$(date --rfc-3339=s)" \
 		--label "org.opencontainers.image.revision"="$$(git rev-parse HEAD)" \

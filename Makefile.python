@@ -21,6 +21,12 @@ PYLINT_PIP_PKGS =
 PYLINT_ARGS     =
 PYLINT_DIR      = .
 
+# Black
+BLACK_VERSION   = latest
+BLACK_LINT_ARGS = --check --diff
+BLACK_FIX_ARGS  =
+BLACK_DIR       = .
+
 
 # -------------------------------------------------------------------------------------------------
 # Lint Targets
@@ -28,6 +34,7 @@ PYLINT_DIR      = .
 .PHONY: lint
 lint:: lint-mypy
 lint:: lint-pylint
+lint:: lint-black
 
 
 .PHONY: lint-mypy
@@ -49,6 +56,32 @@ lint-pylint:
 	@echo "################################################################################"
 	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data --entrypoint=sh cytopia/pylint:$(PYLINT_VERSION) \
 		-c 'for pkg in $(PYLINT_PIP_PKGS); do python3 -m pip install $${pkg}; done && pylint $(PYLINT_ARGS) $(PYLINT_DIR)'
+
+.PHONY: lint-black
+lint-black: _lint-black-pull
+lint-black:
+	@echo "################################################################################"
+	@echo "# Lint Python Black"
+	@echo "################################################################################"
+	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data cytopia/black:$(BLACK_VERSION) \
+		$(BLACK_LINT_ARGS) \
+		$(BLACK_DIR)
+
+# -------------------------------------------------------------------------------------------------
+# Fix Targets
+# -------------------------------------------------------------------------------------------------
+.PHONY: fix
+fix:: fix-black
+
+fix-black: _lint-black-pull
+fix-black:
+	@echo "################################################################################"
+	@echo "# Fix Python Black"
+	@echo "################################################################################"
+	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data cytopia/black:$(BLACK_VERSION) \
+		$(BLACK_FIX_ARGS) \
+		$(BLACK_DIR)
+
 
 
 # -------------------------------------------------------------------------------------------------
@@ -73,6 +106,19 @@ _lint-pylint-pull:
 	SUCC=0; \
 	for i in $$(seq 10); do \
 		if docker pull -q cytopia/pylint:$(PYLINT_VERSION); then \
+			SUCC=1; \
+			break; \
+		fi; \
+		sleep 1; \
+	done; \
+	if [ "$${SUCC}" = "0" ]; then echo "FAILED"; exit 1; fi;
+
+.PHONY: _lint-black-pull
+_lint-black-pull:
+	@echo "Pulling cytopia/black:$(BLACK_VERSION)"; \
+	SUCC=0; \
+	for i in $$(seq 10); do \
+		if docker pull -q cytopia/black:$(BLACK_VERSION); then \
 			SUCC=1; \
 			break; \
 		fi; \

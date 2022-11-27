@@ -21,6 +21,11 @@ PYLINT_PIP_PKGS =
 PYLINT_ARGS     =
 PYLINT_DIR      = .
 
+# PyCodeStyle
+PYCODE_VERSION  = latest
+PYCODE_ARGS     =
+PYCODE_DIR      = .
+
 # Black
 BLACK_VERSION   = latest
 BLACK_LINT_ARGS = --check --diff
@@ -34,6 +39,7 @@ BLACK_DIR       = .
 .PHONY: lint
 lint:: lint-mypy
 lint:: lint-pylint
+lint:: lint-pycode
 lint:: lint-black
 
 
@@ -56,6 +62,16 @@ lint-pylint:
 	@echo "################################################################################"
 	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data --entrypoint=sh cytopia/pylint:$(PYLINT_VERSION) \
 		-c 'for pkg in $(PYLINT_PIP_PKGS); do python3 -m pip install $${pkg}; done && pylint $(PYLINT_ARGS) $(PYLINT_DIR)'
+
+.PHONY: lint-pycode
+lint-pycode: _lint-pycode-pull
+lint-pycode:
+	@echo "################################################################################"
+	@echo "# Lint PyCodeStyle"
+	@echo "################################################################################"
+	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data cytopia/pycodestyle:$(PYCODE_VERSION) \
+		$(PYCODE_ARGS) \
+		$(PYCODE_DIR)
 
 .PHONY: lint-black
 lint-black: _lint-black-pull
@@ -106,6 +122,19 @@ _lint-pylint-pull:
 	SUCC=0; \
 	for i in $$(seq 10); do \
 		if docker pull -q cytopia/pylint:$(PYLINT_VERSION); then \
+			SUCC=1; \
+			break; \
+		fi; \
+		sleep 1; \
+	done; \
+	if [ "$${SUCC}" = "0" ]; then echo "FAILED"; exit 1; fi;
+
+.PHONY: _lint-pycode-pull
+_lint-pycode-pull:
+	@echo "Pulling cytopia/pycodestyle:$(PYCODE_VERSION)"; \
+	SUCC=0; \
+	for i in $$(seq 10); do \
+		if docker pull -q cytopia/pycodestyle:$(PYCODE_VERSION); then \
 			SUCC=1; \
 			break; \
 		fi; \

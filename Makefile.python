@@ -1,0 +1,81 @@
+ifneq (,)
+.error This Makefile requires GNU Make.
+endif
+
+ifndef VERBOSE
+MAKEFLAGS += --no-print-directory
+endif
+
+
+# -------------------------------------------------------------------------------------------------
+# Default configuration
+# -------------------------------------------------------------------------------------------------
+# MyPy
+MYPY_VERSION    = latest
+MYPY_ARGS       =
+MYPY_DIR        = .
+
+# Pylint
+PYLINT_VERSION  = latest
+PYLINT_PIP_PKGS =
+PYLINT_ARGS     =
+PYLINT_DIR      = .
+
+
+# -------------------------------------------------------------------------------------------------
+# Lint Targets
+# -------------------------------------------------------------------------------------------------
+.PHONY: lint
+lint:: lint-mypy
+lint:: lint-pylint
+
+
+.PHONY: lint-mypy
+lint-mypy: _lint-mypy-pull
+lint-mypy:
+	@echo "################################################################################"
+	@echo "# Lint MyPy"
+	@echo "################################################################################"
+	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data cytopia/mypy:$(MYPY_VERSION) \
+		--install-types \
+		--non-interactive \
+		$(MYPY_ARGS) $(MYPY_DIR)
+
+.PHONY: lint-pylint
+lint-pylint: _lint-pylint-pull
+lint-pylint:
+	@echo "################################################################################"
+	@echo "# Lint Pylint"
+	@echo "################################################################################"
+	docker run --rm $$(tty -s && echo "-it" || echo) -e PIP_ROOT_USER_ACTION=ignore -v $$(pwd):/data -w /data --entrypoint=sh cytopia/pylint:$(PYLINT_VERSION) \
+		-c 'for pkg in $(PYLINT_PIP_PKGS); do python3 -m pip install $${pkg}; done && pylint $(PYLINT_ARGS) $(PYLINT_DIR)'
+
+
+# -------------------------------------------------------------------------------------------------
+# Helper Targets
+# -------------------------------------------------------------------------------------------------
+.PHONY: _lint-mypy-pull
+_lint-mypy-pull:
+	@echo "Pulling cytopia/mypy:$(MYPY_VERSION)"; \
+	SUCC=0; \
+	for i in $$(seq 10); do \
+		if docker pull -q cytopia/mypy:$(MYPY_VERSION); then \
+			SUCC=1; \
+			break; \
+		fi; \
+		sleep 1; \
+	done; \
+	if [ "$${SUCC}" = "0" ]; then echo "FAILED"; exit 1; fi;
+
+.PHONY: _lint-pylint-pull
+_lint-pylint-pull:
+	@echo "Pulling cytopia/pylint:$(PYLINT_VERSION)"; \
+	SUCC=0; \
+	for i in $$(seq 10); do \
+		if docker pull -q cytopia/pylint:$(PYLINT_VERSION); then \
+			SUCC=1; \
+			break; \
+		fi; \
+		sleep 1; \
+	done; \
+	if [ "$${SUCC}" = "0" ]; then echo "FAILED"; exit 1; fi;

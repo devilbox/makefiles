@@ -198,7 +198,13 @@ docker-load:
 #  Helper Targets
 # -------------------------------------------------------------------------------------------------
 .PHONY: docker-pull-base-image
-_DOCKER_PULL_BASE_IMAGES_FOUND = $(shell grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | sort -u )
+_DOCKER_PULL_BASE_IMAGES_FOUND = $(shell \
+	if [ ! -f "$(DIR)/$(FILE)" ]; then \
+		echo "Error, Dockerfile not found in: $(DIR)/$(FILE)" >&2; \
+		exit 1; \
+	fi; \
+	grep FROM $(DIR)/$(FILE) | sed 's/^FROM\s*//g' | sed 's/\s.*$$//g' | sort -u \
+)
 DOCKER_PULL_VARIABLES = "VERSION=$(VERSION)"
 docker-pull-base-image:
 	@echo "################################################################################"
@@ -209,6 +215,9 @@ docker-pull-base-image:
 	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; echo "Images Found:  $(_DOCKER_PULL_BASE_IMAGES_FOUND)"
 	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; echo "Images Ignore: $(DOCKER_PULL_BASE_IMAGES_IGNORE)"
 	@echo
+	@if [ "$(.SHELLSTATUS)" != "0" ]; then \
+		exit 1; \
+	fi
 	# These variables will be exported to the shell
 	@if [ -n $(DOCKER_PULL_VARIABLES) ];then for e in $(DOCKER_PULL_VARIABLES);do export "$${e}";done;fi; \
 	echo $(_DOCKER_PULL_BASE_IMAGES_FOUND) | sed 's/\s/\n/g' | while read -r line; do \

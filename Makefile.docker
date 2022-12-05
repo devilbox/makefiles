@@ -82,6 +82,7 @@ docker-arch-build:
 	docker build \
 		$(NO_CACHE) \
 		$(ARGS) \
+		$$( if [ -n "$(DOCKER_TARGET)" ]; then echo "--target $(DOCKER_TARGET)"; fi; ) \
 		--network host \
 		--platform $(ARCH) \
 		--label "org.opencontainers.image.created"="$$(date --rfc-3339=s)" \
